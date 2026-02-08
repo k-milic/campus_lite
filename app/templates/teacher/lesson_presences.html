@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Präsenzen – {{ lesson.course.name }}</h2>
+<p>
+    {{ lesson.date }} |
+    {{ time_hm(lesson.start_time) }} – {{ time_hm(lesson.end_time) }}
+</p>
+
+<form method="post">
+    <table class="table">
+        <thead class="table-dark">
+            <tr>
+                <th>Student</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.username }}</td>
+                <td>
+                    <select name="status_{{ student.id }}"
+                            class="form-select form-select-sm"
+                            style="max-width: 200px;">
+                        <option value="">–</option>
+                        <option value="present"
+                            {% if existing.get(student.id) == "present" %}selected{% endif %}>
+                            Anwesend
+                        </option>
+                        <option value="absent"
+                            {% if existing.get(student.id) == "absent" %}selected{% endif %}>
+                            Abwesend
+                        </option>
+                        <option value="excused"
+                            {% if existing.get(student.id) == "excused" %}selected{% endif %}>
+                            Dispensiert
+                        </option>
+                    </select>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button class="btn btn-success btn-sm">
+        Speichern
+    </button>
+
+    <a href="{{ url_for('teacher.lesson_list', course_id=lesson.course.id) }}"
+       class="btn btn-secondary btn-sm">
+        Zurück
+    </a>
+</form>
+{% endblock %}

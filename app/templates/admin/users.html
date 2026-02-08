@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Benutzerverwaltung</h2>
+
+<table class="table table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Benutzername</th>
+            <th>E-Mail</th>
+            <th>Rolle</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                <form method="post"
+                      action="{{ url_for('admin.update_user_role', user_id=user.id) }}"
+                      class="d-flex gap-2">
+
+                    <select name="role" class="form-select form-select-sm">
+                        <option value="student" {% if user.role == "student" %}selected{% endif %}>
+                            Student
+                        </option>
+                        <option value="teacher" {% if user.role == "teacher" %}selected{% endif %}>
+                            Teacher
+                        </option>
+                        <option value="admin" {% if user.role == "admin" %}selected{% endif %}>
+                            Admin
+                        </option>
+                    </select>
+
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-primary">
+                        Speichern
+                    </button>
+                </form>
+            </td>
+            <td>
+                <form method="post"
+                      action="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                      onsubmit="return confirm('Benutzer wirklich löschen?')">
+
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger">
+                        Löschen
+                    </button>
+                </form>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                Keine Benutzer vorhanden
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

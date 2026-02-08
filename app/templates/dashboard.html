@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Dashboard</h2>
+
+<p>Willkommen bei <strong>campus_lite</strong>.</p>
+
+{% if current_user.role == "student" %}
+    <p>Du bist als <strong>Schüler</strong> eingeloggt.</p>
+{% elif current_user.role == "teacher" %}
+    <p>Du bist als <strong>Lehrer</strong> eingeloggt.</p>
+{% elif current_user.role == "admin" %}
+    <p>Du bist als <strong>Admin</strong> eingeloggt.</p>
+{% endif %}
+{% endblock %}

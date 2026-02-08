@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Neues Fach erstellen</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Fachname</label>
+        <input type="text"
+               name="name"
+               class="form-control"
+               required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Beschreibung</label>
+        <textarea name="description"
+                  class="form-control"
+                  rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-success">
+        Fach erstellen
+    </button>
+
+    <a href="{{ url_for('teacher.course_list') }}"
+       class="btn btn-secondary">
+        Abbrechen
+    </a>
+</form>
+{% endblock %}

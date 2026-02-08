@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Lektion erstellen – {{ course.name }}</h2>
+
+<form method="post" style="max-width: 420px;">
+
+    <div class="mb-3">
+        <label class="form-label">Datum</label>
+        <input type="date"
+               name="date"
+               class="form-control form-control-sm"
+               style="max-width: 160px;"
+               required>
+    </div>
+
+    <div class="d-flex gap-3 mb-3">
+        <div>
+            <label class="form-label">Von</label>
+            <input type="time"
+                   name="start_time"
+                   class="form-control form-control-sm"
+                   style="max-width: 120px;"
+                   required>
+        </div>
+
+        <div>
+            <label class="form-label">Bis</label>
+            <input type="time"
+                   name="end_time"
+                   class="form-control form-control-sm"
+                   style="max-width: 120px;"
+                   required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Raum</label>
+        <input type="text"
+               name="room"
+               class="form-control form-control-sm"
+               placeholder="optional">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Gebäude</label>
+        <input type="text"
+               name="building"
+               class="form-control form-control-sm"
+               placeholder="optional">
+    </div>
+
+    <button class="btn btn-success btn-sm">
+        Speichern
+    </button>
+
+    <a href="{{ url_for('teacher.lesson_list', course_id=course.id) }}"
+       class="btn btn-secondary btn-sm">
+        Abbrechen
+    </a>
+</form>
+{% endblock %}

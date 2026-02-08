@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Lektionen – {{ course.name }}</h2>
+
+<a href="{{ url_for('teacher.create_lesson', course_id=course.id) }}"
+   class="btn btn-primary mb-3">
+    + Lektion hinzufügen
+</a>
+
+<table class="table">
+    <thead class="table-dark">
+        <tr>
+            <th>Datum</th>
+            <th>Von</th>
+            <th>Bis</th>
+            <th>Raum</th>
+            <th>Gebäude</th>
+            <th style="width: 320px;">Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lesson in lessons %}
+        <tr>
+            <td>{{ lesson.date }}</td>
+            <td>{{ time_hm(lesson.start_time) }}</td>
+            <td>{{ time_hm(lesson.end_time) }}</td>
+            <td>{{ lesson.room or "-" }}</td>
+            <td>{{ lesson.building or "-" }}</td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- Bearbeiten -->
+                    <a href="{{ url_for('teacher.edit_lesson', lesson_id=lesson.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        Bearbeiten
+                    </a>
+
+                    <!-- Präsenzen -->
+                    <a href="{{ url_for('teacher.lesson_presences', lesson_id=lesson.id) }}"
+                       class="btn btn-sm btn-outline-secondary">
+                        Präsenzen
+                    </a>
+
+                    <!-- Löschen -->
+                    <form method="post"
+                          action="{{ url_for('teacher.delete_lesson', lesson_id=lesson.id) }}"
+                          onsubmit="return confirm('Lektion wirklich löschen?');">
+                        <button class="btn btn-sm btn-danger">
+                            Löschen
+                        </button>
+                    </form>
+
+                </div>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">Keine Lektionen vorhanden</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('teacher.course_list') }}"
+   class="btn btn-secondary">
+    Zurück zu Fächern
+</a>
+{% endblock %}

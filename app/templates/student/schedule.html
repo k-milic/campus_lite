@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Stundenplan</h2>
+
+<table class="table table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Datum</th>
+            <th>Von</th>
+            <th>Bis</th>
+            <th>Fach</th>
+            <th>Dozent</th>
+            <th>Raum</th>
+            <th>Gebäude</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for lesson in lessons %}
+        <tr>
+            <td>{{ lesson.date.strftime("%d.%m.%Y") }}</td>
+            <td>{{ lesson.start_time.strftime("%H:%M") }}</td>
+            <td>{{ lesson.end_time.strftime("%H:%M") }}</td>
+            <td>{{ lesson.course.name }}</td>
+            <td>{{ lesson.course.teacher.username }}</td>
+            <td>{{ lesson.room or "-" }}</td>
+            <td>{{ lesson.location or "-" }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">
+                Kein Stundenplan vorhanden
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

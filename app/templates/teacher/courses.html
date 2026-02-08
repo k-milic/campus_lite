@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Meine Fächer</h2>
+
+<a href="{{ url_for('teacher.create_course') }}"
+   class="btn btn-primary mb-3">
+    + Neues Fach
+</a>
+
+<table class="table">
+    <thead class="table-dark">
+        <tr>
+            <th>Fach</th>
+            <th>Beschreibung</th>
+            <th style="width: 360px;">Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for course in courses %}
+        <tr>
+            <td>{{ course.name }}</td>
+            <td>{{ course.description or "-" }}</td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+
+                    <a href="{{ url_for('teacher.lesson_list', course_id=course.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        Lektionen planen
+                    </a>
+
+                    <a href="{{ url_for('teacher.course_students', course_id=course.id) }}"
+                       class="btn btn-sm btn-outline-secondary">
+                        Studenten
+                    </a>
+
+                    <form method="post"
+                          action="{{ url_for('teacher.delete_course', course_id=course.id) }}"
+                          onsubmit="return confirm('Fach wirklich löschen?');">
+                        <button class="btn btn-sm btn-danger">
+                            Löschen
+                        </button>
+                    </form>
+
+                </div>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3">Keine Fächer vorhanden</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

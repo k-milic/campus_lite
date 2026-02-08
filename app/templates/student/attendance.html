@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Präsenzeinsicht</h2>
+
+<table class="table table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Fach</th>
+            <th>Dozent</th>
+            <th>Lektionen total</th>
+            <th>Teilgenommen</th>
+            <th>Anwesenheit</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for item in overview %}
+        <tr>
+            <td>{{ item.course.name }}</td>
+            <td>{{ item.teacher }}</td>
+            <td>{{ item.total }}</td>
+            <td>{{ item.present }}</td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            data-percent="{{ item.percent }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                        </div>
+                    </div>
+                    <strong>{{ item.percent }}%</strong>
+                </div>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                Keine Präsenzeinträge vorhanden
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<script>
+document.querySelectorAll(".progress-bar").forEach(bar => {
+    const percent = parseFloat(bar.dataset.percent);
+    bar.style.width = percent + "%";
+
+    if (percent >= 80) {
+        bar.classList.add("bg-success");
+    } else if (percent >= 50) {
+        bar.classList.add("bg-warning");
+    } else {
+        bar.classList.add("bg-danger");
+    }
+});
+</script>
+{% endblock %}

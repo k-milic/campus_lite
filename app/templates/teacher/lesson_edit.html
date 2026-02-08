@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Lektion bearbeiten</h2>
+
+<form method="post" style="max-width: 420px;">
+
+    <div class="mb-3">
+        <label class="form-label">Datum</label>
+        <input type="date"
+               name="date"
+               class="form-control form-control-sm"
+               style="max-width: 160px;"
+               value="{{ lesson.date }}"
+               required>
+    </div>
+
+    <div class="d-flex gap-3 mb-3">
+        <div>
+            <label class="form-label">Von</label>
+            <input type="time"
+                   name="start_time"
+                   class="form-control form-control-sm"
+                   style="max-width: 120px;"
+                   value="{{ lesson.start_time }}"
+                   required>
+        </div>
+
+        <div>
+            <label class="form-label">Bis</label>
+            <input type="time"
+                   name="end_time"
+                   class="form-control form-control-sm"
+                   style="max-width: 120px;"
+                   value="{{ lesson.end_time }}"
+                   required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Raum</label>
+        <input type="text"
+               name="room"
+               class="form-control form-control-sm"
+               value="{{ lesson.room }}">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Gebäude</label>
+        <input type="text"
+               name="building"
+               class="form-control form-control-sm"
+               value="{{ lesson.building }}">
+    </div>
+
+    <button class="btn btn-success btn-sm">
+        Aktualisieren
+    </button>
+
+    <a href="{{ url_for('teacher.lesson_list', course_id=lesson.course.id) }}"
+       class="btn btn-secondary btn-sm">
+        Abbrechen
+    </a>
+</form>
+{% endblock %}

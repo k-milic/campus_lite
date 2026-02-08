@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">
+    Praesenz – {{ lesson.course.name }}
+    ({{ lesson.date.strftime("%d.%m.%Y") }})
+</h2>
+
+<form method="post">
+<table class="table table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Student</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for student in students %}
+        <tr>
+            <td>{{ student.username }}</td>
+            <td>
+                <select name="status_{{ student.id }}"
+                        class="form-select">
+                    <option value="present">Anwesend</option>
+                    <option value="excused">Dispensiert</option>
+                    <option value="absent">Abwesend</option>
+                </select>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<button class="btn btn-success">
+    Praesenz speichern
+</button>
+
+<a href="{{ url_for('teacher.lesson_list', course_id=lesson.course.id) }}"
+   class="btn btn-secondary ms-2">
+    Abbrechen
+</a>
+</form>
+{% endblock %}
