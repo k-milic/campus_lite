@@ -1,3 +1,3 @@
-# campus-lite
+# campus_lite
 
 Webanwendung zur Verwaltung von Kursen, Lektionen und Anwesenheiten.
