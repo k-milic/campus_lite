@@ -9,8 +9,8 @@ services:
       echo 'Waiting for database...' &&
       sleep 15 &&
       flask db upgrade &&
-      python scripts/init_demo_data.py &&
-      gunicorn -b 0.0.0.0:5000 run:app
+      python -m scripts.init_demo_data &&
+      gunicorn -b 0.0.0.0:5000 --timeout 120 run:app
       "
     ports:
       - "5000:5000"
