@@ -1,13 +1,14 @@
 FROM python:3.9-slim
 
-WORKDIR /app
+WORKDIR /campus-lite
 
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
 ENV FLASK_APP=run.py
-ENV FLASK_RUN_HOST=0.0.0.0
+ENV PYTHONPATH=/campus-lite
 
-CMD ["flask", "run"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "run:app"]
