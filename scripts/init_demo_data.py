@@ -5,19 +5,43 @@ from app.models import User
 app = create_app()
 
 with app.app_context():
-    db.create_all()
 
+    # Falls DB leer ist, Demo-Daten anlegen
     if User.query.count() == 0:
-        admin = User(username="admin", email="admin@campus-lite.ch", role="admin")
+
+        users = []
+
+        # Admin
+        admin = User(
+            username="admin",
+            email="admin@campus-lite.ch",
+            role="admin"
+        )
         admin.set_password("admin123")
+        users.append(admin)
 
-        teacher = User(username="teacher1", email="teacher@campus-lite.ch", role="teacher")
+        # Teacher
+        teacher = User(
+            username="teacher1",
+            email="teacher@campus-lite.ch",
+            role="teacher"
+        )
         teacher.set_password("teacher123")
+        users.append(teacher)
 
-        student = User(username="student1", email="student@campus-lite.ch", role="student")
-        student.set_password("student123")
+        # 10 Studenten
+        for i in range(1, 11):
+            student = User(
+                username=f"student{i}",
+                email=f"student{i}@campus-lite.ch",
+                role="student"
+            )
+            student.set_password("student123")
+            users.append(student)
 
-        db.session.add_all([admin, teacher, student])
+        db.session.add_all(users)
         db.session.commit()
 
-        print("Demo-User erstellt")
+        print("Demo-User erfolgreich erstellt.")
+    else:
+        print("User existieren bereits. Keine neuen erstellt.")
