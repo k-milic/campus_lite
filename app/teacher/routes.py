@@ -11,15 +11,17 @@ from app.models import (
     Attendance
 )
 
-# ===============================
-# KURSE
-# ===============================
+# -------------------------------
+# Courses
+# -------------------------------
 @teacher_bp.route("/teacher/courses")
 @login_required
 def course_list():
+    # Restrict this area to teachers.
     if current_user.role != "teacher":
         return redirect(url_for("dashboard"))
 
+    # Teachers only see their own courses.
     courses = Course.query.filter_by(teacher_id=current_user.id).all()
     return render_template("teacher/courses.html", courses=courses)
 
@@ -27,10 +29,12 @@ def course_list():
 @teacher_bp.route("/teacher/courses/create", methods=["GET", "POST"])
 @login_required
 def create_course():
+    # Restrict this area to teachers.
     if current_user.role != "teacher":
         return redirect(url_for("dashboard"))
 
     if request.method == "POST":
+        # Create a new course owned by the current teacher.
         course = Course(
             name=request.form.get("name"),
             description=request.form.get("description"),
@@ -49,6 +53,7 @@ def create_course():
 def delete_course(course_id):
     course = Course.query.get_or_404(course_id)
 
+    # Teachers can delete only their own courses.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
@@ -58,23 +63,26 @@ def delete_course(course_id):
     return redirect(url_for("teacher.course_list"))
 
 
-# ===============================
-# STUDENTEN ZU FACH
-# ===============================
+# -------------------------------
+# Student enrollment per course
+# -------------------------------
 @teacher_bp.route("/teacher/courses/<int:course_id>/students", methods=["GET", "POST"])
 @login_required
 def course_students(course_id):
     course = Course.query.get_or_404(course_id)
 
+    # Ensure teacher owns the selected course.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
+    # Build data for checkbox UI (all students + currently enrolled ids).
     students = User.query.filter_by(role="student").all()
     enrolled_ids = {
         e.student_id for e in Enrollment.query.filter_by(course_id=course.id)
     }
 
     if request.method == "POST":
+        # Replace enrollment list with submitted selection.
         Enrollment.query.filter_by(course_id=course.id).delete()
 
         for student_id in request.form.getlist("students"):
@@ -97,17 +105,19 @@ def course_students(course_id):
     )
 
 
-# ===============================
-# LEKTIONEN
-# ===============================
+# -------------------------------
+# Lessons
+# -------------------------------
 @teacher_bp.route("/teacher/courses/<int:course_id>/lessons")
 @login_required
 def lesson_list(course_id):
     course = Course.query.get_or_404(course_id)
 
+    # Ensure teacher owns the selected course.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
+    # Show lessons in chronological order.
     lessons = (
         Lesson.query
         .filter_by(course_id=course.id)
@@ -127,10 +137,12 @@ def lesson_list(course_id):
 def create_lesson(course_id):
     course = Course.query.get_or_404(course_id)
 
+    # Ensure teacher owns the selected course.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
     if request.method == "POST":
+        # Create a lesson from submitted form fields.
         lesson = Lesson(
             course_id=course.id,
             date=request.form.get("date"),
@@ -153,10 +165,12 @@ def edit_lesson(lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     course = lesson.course
 
+    # Ensure teacher owns the course linked to this lesson.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
     if request.method == "POST":
+        # Update lesson details with form values.
         lesson.date = request.form.get("date")
         lesson.start_time = request.form.get("start_time")
         lesson.end_time = request.form.get("end_time")
@@ -176,6 +190,7 @@ def delete_lesson(lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     course = lesson.course
 
+    # Ensure teacher owns the course linked to this lesson.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
@@ -185,22 +200,25 @@ def delete_lesson(lesson_id):
     return redirect(url_for("teacher.lesson_list", course_id=course.id))
 
 
-# ===============================
-# PRÄSENZEN PRO LEKTION
-# ===============================
+# -------------------------------
+# Attendance per lesson
+# -------------------------------
 @teacher_bp.route("/teacher/lessons/<int:lesson_id>/presences", methods=["GET", "POST"])
 @login_required
 def lesson_presences(lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     course = lesson.course
 
+    # Ensure teacher owns the course linked to this lesson.
     if course.teacher_id != current_user.id:
         return redirect(url_for("teacher.course_list"))
 
+    # Attendance can be entered only for students enrolled in this course.
     enrollments = Enrollment.query.filter_by(course_id=course.id).all()
     students = [e.student for e in enrollments]
 
     if request.method == "POST":
+        # Replace all attendance rows for this lesson with submitted statuses.
         Attendance.query.filter_by(lesson_id=lesson.id).delete()
 
         for student in students:
