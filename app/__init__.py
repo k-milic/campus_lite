@@ -6,25 +6,20 @@ from app.extensions import db, migrate, login_manager
 
 
 def create_app():
+    # Application factory pattern: creates a configured Flask app instance.
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # --------------------------------------------------
-    # Extensions
-    # --------------------------------------------------
+    # Initialize Flask extensions with this app instance.
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
 
-    # --------------------------------------------------
-    # Models laden (wichtig für Migrate)
-    # --------------------------------------------------
+    # Import models so SQLAlchemy/Alembic can discover all tables.
     from app import models
 
-    # --------------------------------------------------
-    # Blueprints
-    # --------------------------------------------------
+    # Register route blueprints.
     from app.auth import auth_bp
     app.register_blueprint(auth_bp)
 
@@ -34,17 +29,13 @@ def create_app():
     from app.admin import admin_bp
     app.register_blueprint(admin_bp)
 
-    # --------------------------------------------------
-    # User Loader
-    # --------------------------------------------------
+    # Tell Flask-Login how to load a user from the session-stored user id.
     @login_manager.user_loader
     def load_user(user_id):
         from app.models import User
         return User.query.get(int(user_id))
 
-    # --------------------------------------------------
-    # Basis-Routen
-    # --------------------------------------------------
+    # Landing route: send authenticated users to dashboard, others to login.
     @app.route("/")
     def index():
         if current_user.is_authenticated:
@@ -56,21 +47,17 @@ def create_app():
     def dashboard():
         return render_template("dashboard.html")
 
-    # ==================================================
-    # STUDENT
-    # ==================================================
-
-    # -------------------------
-    # Stundenplan
-    # -------------------------
+    # Student schedule view.
     @app.route("/student/schedule")
     @login_required
     def student_schedule():
+        # Only students can access student endpoints.
         if current_user.role != "student":
             return redirect(url_for("dashboard"))
 
         from app.models import Lesson, Enrollment, Course
 
+        # Load only lessons for courses where the current user is enrolled.
         lessons = (
             Lesson.query
             .join(Course)
@@ -85,12 +72,11 @@ def create_app():
             lessons=lessons
         )
 
-    # -------------------------
-    # Präsenzeinsicht (Übersicht pro Fach)
-    # -------------------------
+    # Student attendance overview per course.
     @app.route("/student/attendance")
     @login_required
     def student_attendance():
+        # Only students can access student endpoints.
         if current_user.role != "student":
             return redirect(url_for("dashboard"))
 
@@ -105,9 +91,11 @@ def create_app():
         for enrollment in enrollments:
             course = enrollment.course
 
+            # Count all planned lessons in this course.
             lessons = Lesson.query.filter_by(course_id=course.id).all()
             total_lessons = len(lessons)
 
+            # Load this student's attendance entries for the current course.
             attendances = (
                 Attendance.query
                 .join(Lesson)
@@ -118,15 +106,18 @@ def create_app():
                 .all()
             )
 
+            # "excused" is counted as present for percentage calculation.
             present_count = sum(
                 1 for a in attendances if a.status in ("present", "excused")
             )
 
+            # Guard against division by zero when no lessons exist yet.
             percent = (
                 round((present_count / total_lessons) * 100, 1)
                 if total_lessons > 0 else 0
             )
 
+            # Collect one display row per enrolled course.
             overview.append({
                 "course": course,
                 "teacher": course.teacher.username,

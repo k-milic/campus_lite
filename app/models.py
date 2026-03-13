@@ -5,9 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 
 
-# =========================================================
-# USER
-# =========================================================
+# Application user model (students, teachers, admins).
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -21,7 +19,7 @@ class User(UserMixin, db.Model):
     role = db.Column(
         db.String(20),
         nullable=False,
-        default="student"  # student | teacher | admin
+        default="student"  # Allowed values: student | teacher | admin.
     )
 
     created_at = db.Column(
@@ -29,12 +27,11 @@ class User(UserMixin, db.Model):
         default=datetime.utcnow
     )
 
-    # -------------------------
-    # Passwort-Helper
-    # -------------------------
+    # Store a hashed password instead of raw text.
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
+    # Validate a plain-text password against the stored hash.
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
@@ -42,9 +39,7 @@ class User(UserMixin, db.Model):
         return f"<User {self.username} ({self.role})>"
 
 
-# =========================================================
-# COURSE (FACH)
-# =========================================================
+# Course/subject created and owned by a teacher.
 class Course(db.Model):
     __tablename__ = "courses"
 
@@ -74,9 +69,7 @@ class Course(db.Model):
         return f"<Course {self.name}>"
 
 
-# =========================================================
-# ENROLLMENT (Student ↔ Kurs)
-# =========================================================
+# Enrollment mapping between one student and one course.
 class Enrollment(db.Model):
     __tablename__ = "enrollments"
 
@@ -97,6 +90,7 @@ class Enrollment(db.Model):
     student = db.relationship("User", backref="enrollments")
     course = db.relationship("Course", backref="enrollments")
 
+    # Prevent duplicate enrollment of the same student in the same course.
     __table_args__ = (
         db.UniqueConstraint(
             "student_id",
@@ -109,9 +103,7 @@ class Enrollment(db.Model):
         return f"<Enrollment student={self.student_id} course={self.course_id}>"
 
 
-# =========================================================
-# LESSON (LEKTION)
-# =========================================================
+# Scheduled lesson inside a course.
 class Lesson(db.Model):
     __tablename__ = "lessons"
 
@@ -127,7 +119,7 @@ class Lesson(db.Model):
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
 
-    # optional (vor Ort / online)
+    # Optional room/location details.
     room = db.Column(db.String(50), nullable=True)
     building = db.Column(db.String(50), nullable=True)
 
@@ -140,9 +132,7 @@ class Lesson(db.Model):
         )
 
 
-# =========================================================
-# ATTENDANCE (ANWESENHEIT)
-# =========================================================
+# Attendance status per student per lesson.
 class Attendance(db.Model):
     __tablename__ = "attendance"
 
@@ -156,20 +146,20 @@ class Attendance(db.Model):
 
     lesson_id = db.Column(
         db.Integer,
-        db.ForeignKey("lessons.id"),  # 🔴 WICHTIG: lessons.id
+        db.ForeignKey("lessons.id"),  # Must reference lessons.id.
         nullable=False
     )
 
     status = db.Column(
         db.String(20),
         nullable=False,
-        default="present"
-        # present | absent | excused
+        default="present"  # Allowed values: present | absent | excused.
     )
 
     student = db.relationship("User", backref="attendances")
     lesson = db.relationship("Lesson", backref="attendances")
 
+    # Enforce at most one attendance entry per student and lesson.
     __table_args__ = (
         db.UniqueConstraint(
             "student_id",

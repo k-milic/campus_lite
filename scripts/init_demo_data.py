@@ -2,16 +2,17 @@ from app import create_app
 from app.extensions import db
 from app.models import User
 
+# Create an app context so DB queries can run from this script.
 app = create_app()
 
 with app.app_context():
 
-    # Falls DB leer ist, Demo-Daten anlegen
+    # Seed demo users only if the user table is currently empty.
     if User.query.count() == 0:
 
         users = []
 
-        # Admin
+        # Default admin account.
         admin = User(
             username="admin",
             email="admin@campus-lite.ch",
@@ -20,7 +21,7 @@ with app.app_context():
         admin.set_password("admin123")
         users.append(admin)
 
-        # Teacher
+        # Default teacher account.
         teacher = User(
             username="teacher1",
             email="teacher@campus-lite.ch",
@@ -29,7 +30,7 @@ with app.app_context():
         teacher.set_password("teacher123")
         users.append(teacher)
 
-        # 10 Studenten
+        # Ten default student accounts.
         for i in range(1, 11):
             student = User(
                 username=f"student{i}",
