@@ -13,7 +13,7 @@ services:
       gunicorn -w 3 -b 0.0.0.0:5000 --timeout 60 run:app
       "
     ports:
-      - "5000:5000"
+      - "80:5000"
     env_file:
       - .env
     depends_on:
