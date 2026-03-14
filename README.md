@@ -29,6 +29,13 @@ Die App unterstützt die Verwaltung von Kursen/Fächern, Lektionen und Anwesenhe
 - Gunicorn
 - Docker & Docker Compose
 
+## REST API
+
+Eine vollstaendige JSON-API ist unter `/api` verfügbar.
+Die kompakte Endpunkt-Dokumentation (Methode + URL + Auth) steht in:
+
+- `API.md`
+
 ## Projektstruktur (vereinfacht)
 
 ```text
