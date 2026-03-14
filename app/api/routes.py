@@ -1,8 +1,7 @@
 from datetime import datetime
 from functools import wraps
 
-from flask import current_app, g, jsonify, request
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+from flask import g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from app.api import api_bp
@@ -53,40 +52,14 @@ def parse_time(value, field_name):
         )
 
 
-def token_serializer():
-    return URLSafeTimedSerializer(
-        current_app.config["SECRET_KEY"],
-        salt="campus-lite-api-token"
-    )
-
-
 def generate_api_token(user):
-    payload = {
-        "uid": user.id,
-        "pwd": user.password_hash
-    }
-    return token_serializer().dumps(payload)
+    return user.generate_token()
 
 
 def verify_api_token(token):
-    max_age = current_app.config.get("API_TOKEN_MAX_AGE", 43200)
-
-    try:
-        payload = token_serializer().loads(token, max_age=max_age)
-    except SignatureExpired:
-        return None, "Token expired."
-    except BadSignature:
-        return None, "Invalid token."
-
-    user_id = payload.get("uid")
-    password_hash = payload.get("pwd")
-
-    user = User.query.get(user_id)
+    user = User.query.filter_by(api_token=token).first()
     if user is None:
-        return None, "User not found."
-
-    if user.password_hash != password_hash:
-        return None, "Token no longer valid."
+        return None, "Invalid token."
 
     return user, None
 
@@ -269,6 +242,7 @@ def register_api_user():
     return jsonify({"user": serialize_user(user)}), 201
 
 
+@api_bp.route("/login", methods=["POST"])
 @api_bp.route("/auth/login", methods=["POST"])
 def login_api_user():
     data, error = parse_json_body(required=True)
@@ -286,12 +260,11 @@ def login_api_user():
         return api_error("Invalid credentials.", 401)
 
     token = generate_api_token(user)
-    expires_in = current_app.config.get("API_TOKEN_MAX_AGE", 43200)
 
     return jsonify({
+        "token": token,
         "access_token": token,
         "token_type": "Bearer",
-        "expires_in": expires_in,
         "user": serialize_user(user)
     }), 200
 
@@ -302,12 +275,12 @@ def get_authenticated_user():
     return jsonify({"user": serialize_user(g.api_user)}), 200
 
 
+@api_bp.route("/logout", methods=["POST"])
 @api_bp.route("/auth/logout", methods=["POST"])
 @token_required
 def logout_api_user():
-    return jsonify({
-        "message": "Stateless API token: discard token on client side to logout."
-    }), 200
+    g.api_user.revoke_token()
+    return jsonify({"message": "Logged out."}), 200
 
 
 # -------------------------------
