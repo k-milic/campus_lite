@@ -7,14 +7,15 @@
   - `Authorization: Bearer <access_token>`
 
 ## Authentisierung (API-only, ohne Browser)
-1. `POST http://localhost:5000/api/auth/login` mit `username` + `password` aufrufen.
-2. `access_token` aus der Antwort in allen geschuetzten Endpunkten senden.
-3. Token-Laufzeit: `API_TOKEN_MAX_AGE` Sekunden (Default `43200` = 12h).
+1. `POST http://localhost:5000/api/login` mit `username` + `password` aufrufen.
+2. `token` aus der Antwort in allen geschützten Endpunkten senden.
+3. Token wird serverseitig in der DB pro User gespeichert (`users.api_token`).
+4. Logout via `POST http://localhost:5000/api/logout` invalidiert den Token.
 
 Beispiel (HTTPie):
 ```bash
-http POST :5000/api/auth/login username=teacher1 password=teacher123
-http GET :5000/api/courses "Authorization:Bearer <access_token>"
+http POST :5000/api/login username=teacher1 password=teacher123
+http GET :5000/api/courses "Authorization:Bearer <token>"
 ```
 
 ## Endpunkte
@@ -24,6 +25,8 @@ http GET :5000/api/courses "Authorization:Bearer <access_token>"
 
 ### Auth
 - `POST http://localhost:5000/api/auth/register`
+- `POST http://localhost:5000/api/login`
+- `POST http://localhost:5000/api/logout`
 - `POST http://localhost:5000/api/auth/login`
 - `GET http://localhost:5000/api/auth/me`
 - `POST http://localhost:5000/api/auth/logout`
@@ -66,5 +69,5 @@ http GET :5000/api/courses "Authorization:Bearer <access_token>"
 
 ## Rollen-/Zugriffsmodell (Kurz)
 - `student`: nur eigene Daten (`/students/me/*`, eigene Kurs/Lektion-Reads).
-- `teacher`: eigene Kurse, Lektionen, Einschreibungen, Praesenzen.
+- `teacher`: eigene Kurse, Lektionen, Einschreibungen, Präsenzen.
 - `admin`: Vollzugriff + Benutzerverwaltung.
