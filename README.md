@@ -31,7 +31,7 @@ Die App unterstützt die Verwaltung von Kursen/Fächern, Lektionen und Anwesenhe
 
 ## REST API
 
-Eine vollstaendige JSON-API ist unter `/api` verfügbar.
+Eine vollständige JSON-API ist unter `/api` verfügbar.
 Die kompakte Endpunkt-Dokumentation (Methode + URL + Auth) steht in:
 
 - `API.md`
