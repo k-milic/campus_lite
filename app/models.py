@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -22,6 +23,13 @@ class User(UserMixin, db.Model):
         default="student"  # Allowed values: student | teacher | admin.
     )
 
+    api_token = db.Column(
+        db.String(64),
+        unique=True,
+        index=True,
+        nullable=True
+    )
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -34,6 +42,20 @@ class User(UserMixin, db.Model):
     # Validate a plain-text password against the stored hash.
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
+
+    # Generate and persist a new API token for this user.
+    def generate_token(self):
+        while True:
+            token = secrets.token_hex(32)
+            if User.query.filter_by(api_token=token).first() is None:
+                self.api_token = token
+                db.session.commit()
+                return token
+
+    # Revoke current API token.
+    def revoke_token(self):
+        self.api_token = None
+        db.session.commit()
 
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"
