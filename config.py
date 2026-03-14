@@ -5,6 +5,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def int_env(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
 class Config:
     # Flask session/signing key.
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-key")
@@ -29,3 +40,6 @@ class Config:
 
     # Disable object change tracking overhead in SQLAlchemy.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Bearer token lifetime for /api authentication, default: 12 hours.
+    API_TOKEN_MAX_AGE = int_env("API_TOKEN_MAX_AGE", 43200)
