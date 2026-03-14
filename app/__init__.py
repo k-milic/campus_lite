@@ -15,6 +15,8 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
+    login_manager.login_message = "Bitte melde dich an, um auf diese Seite zuzugreifen."
+    login_manager.login_message_category = "info"
 
     # Import models so SQLAlchemy/Alembic can discover all tables.
     from app import models
